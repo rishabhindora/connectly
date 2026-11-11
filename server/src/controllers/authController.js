@@ -1,4 +1,5 @@
 const bcrypt = require("bcrypt");
+const { generateToken } = require("../utils/jwt");
 
 const {
   findUserByEmail,
@@ -72,6 +73,61 @@ const register = async (req, res, next) => {
   }
 };
  
+const login = async (req, res, next) => {
+  try {
+    const { email, password } = req.body;
+
+    if (!email || !password) {
+      return res.status(400).json({
+        success: false,
+        message: "Email and password are required"
+      });
+    }
+
+    const normalizedEmail = email.trim().toLowerCase();
+
+    const user = await findUserByEmail(normalizedEmail);
+
+    if (!user) {
+      return res.status(401).json({
+        success: false,
+        message: "Invalid email or password"
+      });
+    }
+
+    const passwordMatches =
+      await bcrypt.compare(password, user.password);
+
+    if (!passwordMatches) {
+      return res.status(401).json({
+        success: false,
+        message: "Invalid email or password"
+      });
+    }
+
+    const token = generateToken({
+      userId: user.id
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: "Login successful",
+      data: {
+        token,
+        user: {
+          id: user.id,
+          name: user.name,
+          username: user.username,
+          email: user.email
+        }
+      }
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
-  register
+  register,
+  login
 };
