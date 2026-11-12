@@ -28,6 +28,27 @@ const findUserByUsername = async (username) => {
   return rows[0] || null;
 };
 
+const findUserById = async (userId) => {
+  const [rows] = await pool.query(
+    `
+      SELECT
+        id,
+        name,
+        username,
+        email,
+        bio,
+        profile_image,
+        created_at
+      FROM users
+      WHERE id = ?
+      LIMIT 1
+    `,
+    [userId]
+  );
+
+  return rows[0] || null;
+};
+
 const createUser = async ({
   name,
   username,
@@ -54,5 +75,6 @@ const createUser = async ({
 module.exports = {
   findUserByEmail,
   findUserByUsername,
+  findUserById,
   createUser
 };
