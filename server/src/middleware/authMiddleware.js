@@ -1,30 +1,17 @@
 const { verifyToken } = require("../utils/jwt");
+const { AUTH_COOKIE_NAME } = require("../config/authCookie");
 
 const authMiddleware = (req, res, next) => {
   try {
-    const authorization =
-      req.headers.authorization;
+    const token = req.cookies?.[AUTH_COOKIE_NAME];
 
-    if (!authorization) {
+    if (!token) {
+      console.log(token)
       return res.status(401).json({
         success: false,
         message: "Authentication required"
       });
     }
-
-    const parts = authorization.split(" ");
-
-    if (
-      parts.length !== 2 ||
-      parts[0] !== "Bearer"
-    ) {
-      return res.status(401).json({
-        success: false,
-        message: "Invalid authorization format"
-      });
-    }
-
-    const token = parts[1];
 
     const decoded = verifyToken(token);
 
@@ -33,10 +20,11 @@ const authMiddleware = (req, res, next) => {
     };
 
     next();
+
   } catch (error) {
     return res.status(401).json({
       success: false,
-      message: "Invalid or expired token"
+      message: "Invalid or expired authentication"
     });
   }
 };

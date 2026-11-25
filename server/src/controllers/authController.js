@@ -1,5 +1,9 @@
 const bcrypt = require("bcrypt");
 const { generateToken } = require("../utils/jwt");
+const {
+  AUTH_COOKIE_NAME,
+  authCookieOptions
+} = require("../config/authCookie");
 
 const {
   findUserByEmail,
@@ -109,11 +113,12 @@ const login = async (req, res, next) => {
       userId: user.id
     });
 
+    res.cookie(AUTH_COOKIE_NAME, token, authCookieOptions);
+
     return res.status(200).json({
       success: true,
       message: "Login successful",
       data: {
-        token,
         user: {
           id: user.id,
           name: user.name,
@@ -127,7 +132,22 @@ const login = async (req, res, next) => {
   }
 };
 
+const logout = (req, res) => {
+  const { maxAge, ...clearOptions } = authCookieOptions;
+
+  res.clearCookie(
+    AUTH_COOKIE_NAME,
+    clearOptions
+  );
+
+  return res.status(200).json({
+    success: true,
+    message: "Logged out successfully"
+  });
+};
+
 module.exports = {
   register,
-  login
+  login,
+  logout
 };

@@ -1,5 +1,6 @@
 const express = require("express");
 const cors = require("cors");
+const cookieParser = require("cookie-parser");
 
 const healthRoutes = require('./routes/healthRoutes');
 const dbRoutes = require('./routes/dbRoutes');
@@ -11,8 +12,14 @@ const notFoundMiddleware = require('./middleware/notFoundMiddleware');
 
 const app = express();
 
-app.use(cors());
+app.use(
+  cors({
+    origin: process.env.CLIENT_URL,
+    credentials: true
+  })
+);
 app.use(express.json());
+app.use(cookieParser());
 app.get("/",(req, res) => {
   res.send("Welcome to the API");
 });
